@@ -5,17 +5,18 @@ LDFLAGS  = $(shell fltk-config --use-images --ldflags)
 LDSTATIC = $(shell fltk-config --use-images --ldstaticflags)
 LINK     = $(CXX)
 
-# Build directory
 BUILD_DIR = build
 
+SRCS = src/main.cpp src/Point.cpp src/PointDatabase.cpp src/MainWindow.cpp
+
+OBJS = $(SRCS:src/%.cpp=$(BUILD_DIR)/%.o)
+
 TARGET = $(BUILD_DIR)/DimensionalPointsDB
-OBJS   = $(BUILD_DIR)/main.o
-SRCS   = src/main.cpp
 
 .SUFFIXES: .o .cpp
 
 $(BUILD_DIR)/%.o: src/%.cpp | $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) $(DEBUG) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(DEBUG) -Isrc -c $< -o $@
 
 all: $(TARGET)
 
