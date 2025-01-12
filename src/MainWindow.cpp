@@ -10,26 +10,30 @@
 
 MainWindow::MainWindow()
     : isInitialized(false), db(nullptr), mainGroup(nullptr) {
-  window = new Fl_Window(800, 600, "DimensionalPointsDB");
+  window = new Fl_Window(0, 0, Fl::w(), Fl::h(), "DimensionalPointsDB");
+  window->fullscreen();
   showInitialSetup();
   window->end();
 }
 
 void MainWindow::showInitialSetup() {
-  setupGroup = new Fl_Group(0, 0, 800, 600);
+  setupGroup = new Fl_Group(0, 0, Fl::w(), Fl::h());
 
-  Fl_Box* titleBox = new Fl_Box(20, 20, 760, 40, "DimensionalPointsDB");
+  Fl_Box* titleBox = new Fl_Box(20, 20, Fl::w() - 40, 60, "DimensionalPointsDB");
   titleBox->box(FL_UP_BOX);
   titleBox->labelfont(FL_BOLD);
-  titleBox->labelsize(24);
+  titleBox->labelsize(36);
 
-  Fl_Box* dimLabel = new Fl_Box(200, 200, 400, 30, "Enter number of dimensions:");
+  Fl_Box* dimLabel = new Fl_Box(Fl::w() / 4, Fl::h() / 3, Fl::w() / 2, 40, "Enter number of dimensions:");
+  dimLabel->labelsize(20);
 
-  dimInput = new Fl_Int_Input(350, 250, 100, 30, "");
+  dimInput = new Fl_Int_Input(Fl::w() / 2 - 50, Fl::h() / 2 - 15, 100, 30, "");
   dimInput->value("3");
+  dimInput->textsize(16);
 
-  Fl_Button* startButton = new Fl_Button(350, 300, 100, 30, "Start");
+  Fl_Button* startButton = new Fl_Button(Fl::w() / 2 - 50, Fl::h() / 2 + 30, 100, 40, "Start");
   startButton->callback(start_cb, this);
+  startButton->labelsize(16);
 
   setupGroup->end();
 }
@@ -42,17 +46,24 @@ void MainWindow::createMainInterface(int dimensions) {
     window->remove(setupGroup);
   }
 
-  mainGroup = new Fl_Group(0, 0, 800, 600);
+  mainGroup = new Fl_Group(0, 0, Fl::w(), Fl::h());
   mainGroup->begin();
 
   window->label(("DimensionalPointsDB (" + std::to_string(dimensions) + "D)").c_str());
 
-  Fl_Box* titleBox = new Fl_Box(20, 20, 760, 40, "DimensionalPointsDB");
+  Fl_Box* titleBox = new Fl_Box(20, 20, Fl::w() - 40, 60, "DimensionalPointsDB");
   titleBox->box(FL_UP_BOX);
   titleBox->labelfont(FL_BOLD);
-  titleBox->labelsize(24);
+  titleBox->labelsize(36);
 
-  pointInput = new Fl_Input(70, 80, 200, 25, "Point:");
+  int buttonWidth = 120;
+  int buttonHeight = 35;
+  int startX = 20;
+  int topY = 100;
+  int spacing = 10;
+
+  pointInput = new Fl_Input(startX + 70, topY, Fl::w() / 4, buttonHeight, "Point:");
+  pointInput->textsize(16);
 
   std::string defaultValue;
   for (size_t i = 0; i < db->getDimensions(); i++) {
@@ -61,25 +72,36 @@ void MainWindow::createMainInterface(int dimensions) {
   }
   pointInput->value(("(" + defaultValue + ")").c_str());
 
-  Fl_Button* addButton = new Fl_Button(280, 80, 70, 25, "Add");
+  int currentX = startX + Fl::w() / 4 + spacing + 70;
+
+  Fl_Button* addButton = new Fl_Button(currentX, topY, buttonWidth, buttonHeight, "Add");
   addButton->callback(add_cb, this);
+  currentX += buttonWidth + spacing;
 
-  Fl_Button* findButton = new Fl_Button(360, 80, 100, 25, "Find Nearest");
+  Fl_Button* findButton = new Fl_Button(currentX, topY, buttonWidth, buttonHeight, "Find Nearest");
   findButton->callback(find_cb, this);
+  currentX += buttonWidth + spacing;
 
-  Fl_Button* changeDimsButton = new Fl_Button(470, 80, 140, 25, "Change Dimensions");
+  Fl_Button* findFurthestButton = new Fl_Button(currentX, topY, buttonWidth, buttonHeight, "Find Furthest");
+  findFurthestButton->callback(find_furthest_cb, this);
+  currentX += buttonWidth + spacing;
+
+  Fl_Button* changeDimsButton = new Fl_Button(currentX, topY, buttonWidth, buttonHeight, "Change Dims");
   changeDimsButton->callback(change_dims_cb, this);
+  currentX += buttonWidth + spacing;
 
-  Fl_Button* editPointButton = new Fl_Button(620, 80, 70, 25, "Edit");
+  Fl_Button* editPointButton = new Fl_Button(currentX, topY, buttonWidth, buttonHeight, "Edit");
   editPointButton->callback(edit_point_cb, this);
+  currentX += buttonWidth + spacing;
 
-  Fl_Button* deletePointButton = new Fl_Button(700, 80, 70, 25, "Delete");
+  Fl_Button* deletePointButton = new Fl_Button(currentX, topY, buttonWidth, buttonHeight, "Delete");
   deletePointButton->callback(delete_point_cb, this);
 
   buffer = new Fl_Text_Buffer();
-  display = new Fl_Text_Display(20, 120, 760, 460);
+  display = new Fl_Text_Display(20, topY + buttonHeight + spacing, Fl::w() - 40, Fl::h() - (topY + buttonHeight + spacing + 20));
   display->buffer(buffer);
   display->textfont(FL_COURIER);
+  display->textsize(16);
 
   mainGroup->end();
   window->end();
@@ -136,6 +158,21 @@ void MainWindow::find_cb(Fl_Widget*, void* v) {
     fl_message("Nearest point: %s", nearest.toString().c_str());
   } catch (const std::exception& e) {
     fl_alert("Error finding nearest point: %s", e.what());
+  }
+}
+
+void MainWindow::find_furthest_cb(Fl_Widget*, void* v) {
+  MainWindow* win = (MainWindow*)v;
+  if (!win->isInitialized) return;
+
+  try {
+    std::vector<double> coords = win->parsePointInput(win->pointInput->value());
+    Point target(coords);
+
+    Point furthest = win->db->findFurthest(target);
+    fl_message("Furthest point: %s", furthest.toString().c_str());
+  } catch (const std::exception& e) {
+    fl_alert("Error finding furthest point: %s", e.what());
   }
 }
 

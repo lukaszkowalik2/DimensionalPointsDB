@@ -53,6 +53,24 @@ Point PointDatabase::findNearest(const Point& target) const {
   return points[nearestIndex];
 }
 
+Point PointDatabase::findFurthest(const Point& target) const {
+  if (points.empty()) {
+    throw std::runtime_error("Database is empty");
+  }
+
+  size_t furthestIndex = 0;
+  double maxDist = points[0].distanceTo(target);
+
+  for (size_t i = 1; i < points.size(); ++i) {
+    double dist = points[i].distanceTo(target);
+    if (dist > maxDist) {
+      maxDist = dist;
+      furthestIndex = i;
+    }
+  }
+  return points[furthestIndex];
+}
+
 std::string PointDatabase::getAllPoints() const {
   std::stringstream ss;
   for (size_t i = 0; i < points.size(); ++i) {

@@ -18,6 +18,7 @@ class PointDatabase {
   void deletePoint(size_t index);
   size_t getPointCount() const;
   Point getPoint(size_t index) const;
+  Point findFurthest(const Point& target) const;
 
  private:
   void loadFromFile();
