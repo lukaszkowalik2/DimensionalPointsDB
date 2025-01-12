@@ -14,6 +14,10 @@ class PointDatabase {
   Point findNearest(const Point& target) const;
   std::string getAllPoints() const;
   size_t getDimensions() const;
+  void editPoint(size_t index, const Point& newPoint);
+  void deletePoint(size_t index);
+  size_t getPointCount() const;
+  Point getPoint(size_t index) const;
 
  private:
   void loadFromFile();

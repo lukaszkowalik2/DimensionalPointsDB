@@ -70,6 +70,12 @@ void MainWindow::createMainInterface(int dimensions) {
   Fl_Button* changeDimsButton = new Fl_Button(470, 80, 140, 25, "Change Dimensions");
   changeDimsButton->callback(change_dims_cb, this);
 
+  Fl_Button* editPointButton = new Fl_Button(620, 80, 70, 25, "Edit");
+  editPointButton->callback(edit_point_cb, this);
+
+  Fl_Button* deletePointButton = new Fl_Button(700, 80, 70, 25, "Delete");
+  deletePointButton->callback(delete_point_cb, this);
+
   buffer = new Fl_Text_Buffer();
   display = new Fl_Text_Display(20, 120, 760, 460);
   display->buffer(buffer);
@@ -155,6 +161,57 @@ void MainWindow::change_dims_cb(Fl_Widget*, void* v) {
     win->window->redraw();
   } catch (const std::exception& e) {
     fl_alert("Invalid dimension value!");
+  }
+}
+
+void MainWindow::edit_point_cb(Fl_Widget*, void* v) {
+  MainWindow* win = (MainWindow*)v;
+  if (!win->isInitialized) return;
+
+  const char* index_str = fl_input("Enter point index to edit (starting from 1):", "1");
+  if (!index_str) return;
+
+  try {
+    int index = std::stoi(index_str) - 1;
+    if (index < 0 || index >= win->db->getPointCount()) {
+      fl_alert("Invalid point index!");
+      return;
+    }
+
+    Point point = win->db->getPoint(index);
+    const char* new_value = fl_input("Enter new point coordinates:", point.toString().c_str());
+    if (!new_value) return;
+
+    std::vector<double> coords = win->parsePointInput(new_value);
+    if (coords.size() != win->db->getDimensions()) {
+      fl_alert("Wrong number of dimensions!");
+      return;
+    }
+
+    win->db->editPoint(index, Point(coords));
+    win->updateDisplay();
+    win->window->redraw();
+    fl_message("Point updated successfully!");
+  } catch (const std::exception& e) {
+    fl_alert("Error editing point: %s", e.what());
+  }
+}
+
+void MainWindow::delete_point_cb(Fl_Widget*, void* v) {
+  MainWindow* win = (MainWindow*)v;
+  if (!win->isInitialized) return;
+
+  const char* index_str = fl_input("Enter point index to delete (starting from 1):", "1");
+  if (!index_str) return;
+
+  try {
+    int index = std::stoi(index_str) - 1;  // Convert to 0-based index
+    win->db->deletePoint(index);
+    win->updateDisplay();
+    win->window->redraw();
+    fl_message("Point deleted successfully!");
+  } catch (const std::exception& e) {
+    fl_alert("Error deleting point: %s", e.what());
   }
 }
 

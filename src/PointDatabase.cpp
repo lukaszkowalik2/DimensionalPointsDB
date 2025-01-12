@@ -62,8 +62,8 @@ Point PointDatabase::findNearest(const Point& target) const {
 
 std::string PointDatabase::getAllPoints() const {
   std::stringstream ss;
-  for (const auto& p : points) {
-    ss << p.toString() << "\n";
+  for (size_t i = 0; i < points.size(); ++i) {
+    ss << (i + 1) << ". " << points[i].toString() << "\n";
   }
   return ss.str();
 }
@@ -127,4 +127,31 @@ void PointDatabase::saveToFile() const {
     }
     file << "\n";
   }
+}
+
+void PointDatabase::editPoint(size_t index, const Point& newPoint) {
+  if (index >= points.size()) {
+    throw std::out_of_range("Point index out of range");
+  }
+  points[index] = newPoint;
+  saveToFile();
+}
+
+void PointDatabase::deletePoint(size_t index) {
+  if (index >= points.size()) {
+    throw std::out_of_range("Point index out of range");
+  }
+  points.erase(points.begin() + index);
+  saveToFile();
+}
+
+size_t PointDatabase::getPointCount() const {
+  return points.size();
+}
+
+Point PointDatabase::getPoint(size_t index) const {
+  if (index >= points.size()) {
+    throw std::out_of_range("Point index out of range");
+  }
+  return points[index];
 }
