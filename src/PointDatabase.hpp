@@ -25,6 +25,7 @@ class PointDatabase {
   void saveToFile() const;
   void ensureDirectoryExists() const;
   std::string getFilePath() const;
+
   static const std::string DATA_DIR;
   std::vector<Point> points;
   size_t dimensions;

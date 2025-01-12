@@ -10,7 +10,7 @@ Point::Point(const std::vector<double>& coords)
 
 double Point::distanceTo(const Point& other) const {
   if (coords.size() != other.coords.size()) {
-    throw std::runtime_error("Punkty muszą mieć tę samą liczbę wymiarów.");
+    throw std::runtime_error("Points must have the same number of dimensions.");
   }
 
   double sum = 0.0;
