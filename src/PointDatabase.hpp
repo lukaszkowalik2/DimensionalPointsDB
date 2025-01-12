@@ -1,4 +1,7 @@
-#pragma once
+#ifndef POINTDATABASE_HPP
+#define POINTDATABASE_HPP
+
+#include <cstddef>  // size_t
 #include <string>
 #include <vector>
 
@@ -6,7 +9,7 @@
 
 class PointDatabase {
  public:
-  PointDatabase(const std::string& filename, size_t dimensions);
+  explicit PointDatabase(size_t dims);
   void addPoint(const Point& p);
   Point findNearest(const Point& target) const;
   std::string getAllPoints() const;
@@ -15,8 +18,11 @@ class PointDatabase {
  private:
   void loadFromFile();
   void saveToFile() const;
-
+  void ensureDirectoryExists() const;
+  std::string getFilePath() const;
+  static const std::string DATA_DIR;
   std::vector<Point> points;
-  std::string filename;
   size_t dimensions;
 };
+
+#endif
