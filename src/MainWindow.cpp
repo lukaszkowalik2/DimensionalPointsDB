@@ -67,6 +67,9 @@ void MainWindow::createMainInterface(int dimensions) {
   Fl_Button* findButton = new Fl_Button(360, 80, 100, 25, "Find Nearest");
   findButton->callback(find_cb, this);
 
+  Fl_Button* changeDimsButton = new Fl_Button(470, 80, 140, 25, "Change Dimensions");
+  changeDimsButton->callback(change_dims_cb, this);
+
   buffer = new Fl_Text_Buffer();
   display = new Fl_Text_Display(20, 120, 760, 460);
   display->buffer(buffer);
@@ -127,6 +130,31 @@ void MainWindow::find_cb(Fl_Widget*, void* v) {
     fl_message("Nearest point: %s", nearest.toString().c_str());
   } catch (const std::exception& e) {
     fl_alert("Error finding nearest point: %s", e.what());
+  }
+}
+
+void MainWindow::change_dims_cb(Fl_Widget*, void* v) {
+  MainWindow* win = (MainWindow*)v;
+  if (!win->isInitialized) return;
+
+  const char* value = fl_input("Enter new number of dimensions:", "3");
+  if (!value) return;
+
+  try {
+    int dims = std::stoi(value);
+    if (dims < 1) {
+      fl_alert("Dimensions must be positive!");
+      return;
+    }
+
+    delete win->db;
+    win->db = new PointDatabase(dims);
+    win->createMainInterface(dims);
+    win->isInitialized = true;
+    win->updateDisplay();
+    win->window->redraw();
+  } catch (const std::exception& e) {
+    fl_alert("Invalid dimension value!");
   }
 }
 

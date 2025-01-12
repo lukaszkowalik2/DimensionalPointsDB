@@ -34,6 +34,7 @@ class MainWindow {
   static void start_cb(Fl_Widget*, void* v);
   static void add_cb(Fl_Widget*, void* v);
   static void find_cb(Fl_Widget*, void* v);
+  static void change_dims_cb(Fl_Widget*, void* v);
 
   std::vector<double> parsePointInput(const std::string& input) const;
 };
