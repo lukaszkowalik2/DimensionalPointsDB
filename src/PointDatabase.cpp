@@ -6,15 +6,12 @@
 #include <sstream>
 #include <stdexcept>
 
-// Definicja statycznej zmiennej (nazwa katalogu na dane)
 const std::string PointDatabase::DATA_DIR = "datapoints";
 
 PointDatabase::PointDatabase(size_t dims)
     : dimensions(dims) {
-  // Tworzymy katalog, jeśli nie istnieje
   ensureDirectoryExists();
 
-  // Upewniamy się, że plik istnieje (lub go tworzymy)
   std::string filepath = getFilePath();
   std::ofstream file(filepath, std::ios::app);
   if (!file) {
@@ -22,23 +19,20 @@ PointDatabase::PointDatabase(size_t dims)
   }
   file.close();
 
-  // Wczytujemy istniejące punkty z pliku
   loadFromFile();
 }
 
 void PointDatabase::ensureDirectoryExists() const {
-  // Tworzy katalog, jeśli nie istnieje (C++17 <filesystem>)
   std::filesystem::create_directory(DATA_DIR);
 }
 
 std::string PointDatabase::getFilePath() const {
-  // Nazwa pliku zależna od liczby wymiarów, np. datapoints/points_3d.txt
   return DATA_DIR + "/points_" + std::to_string(dimensions) + "d.txt";
 }
 
 void PointDatabase::addPoint(const Point& p) {
   points.push_back(p);
-  saveToFile();  // zapis do pliku po dodaniu
+  saveToFile();
 }
 
 Point PointDatabase::findNearest(const Point& target) const {
@@ -49,7 +43,6 @@ Point PointDatabase::findNearest(const Point& target) const {
   size_t nearestIndex = 0;
   double minDist = points[0].distanceTo(target);
 
-  // Szukamy punktu o najmniejszej odległości Euklidesowej
   for (size_t i = 1; i < points.size(); ++i) {
     double dist = points[i].distanceTo(target);
     if (dist < minDist) {
@@ -84,7 +77,6 @@ void PointDatabase::loadFromFile() {
 
   std::string line;
   while (std::getline(file, line)) {
-    // Zakładamy, że każda linia zawiera wszystkie współrzędne rozdzielone spacją
     try {
       std::stringstream ss(line);
       std::vector<double> point_coords;

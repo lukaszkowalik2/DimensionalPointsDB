@@ -205,7 +205,7 @@ void MainWindow::delete_point_cb(Fl_Widget*, void* v) {
   if (!index_str) return;
 
   try {
-    int index = std::stoi(index_str) - 1;  // Convert to 0-based index
+    int index = std::stoi(index_str) - 1;
     win->db->deletePoint(index);
     win->updateDisplay();
     win->window->redraw();
